@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
 public class OrderEventConsumer {
     @KafkaListener(topics = "order-events", groupId = "notification-service-group")
     public void handleOrderStatus(OrderStatusEvent event){
+        if(event.getUserId() == null || event.getOrderId() == null){
+            throw new IllegalArgumentException("Invalid order event: missing userId or orderId");
+        }
         if("CONFIRMED".equals(event.getStatus())){
             log.info("Sending order confirmation to user {} for order {}, total: {}", event.getUserId(), event.getOrderId(), event.getTotalAmount());
         } else if ("PAYMENT_FAILED".equals(event.getStatus())){
